@@ -1,0 +1,25 @@
+# Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.nbsetup/
+
+# Docker
+.docker/
+
+# Archivos temporales
+*.log
+*.tmp
+.DS_Store

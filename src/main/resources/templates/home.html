@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameStore | Tienda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="main-body">
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/home" class="nav-brand">
+                <span class="nav-icon">🎮</span>
+                <span class="nav-title">GameStore</span>
+            </a>
+
+            <!-- Búsqueda -->
+            <form th:action="@{/home}" method="get" class="nav-search">
+                <input type="text"
+                       name="busqueda"
+                       th:value="${busqueda}"
+                       class="search-input"
+                       placeholder="Buscar videojuegos...">
+                <button type="submit" class="search-btn">🔍</button>
+            </form>
+
+            <div class="nav-actions">
+                <a th:href="@{/carrito}" class="cart-btn">
+                    🛒 Carrito
+                    <span class="cart-badge" th:text="${itemsEnCarrito}" th:if="${itemsEnCarrito > 0}">0</span>
+                </a>
+                <div class="user-menu">
+                    <span class="user-greeting">👋 <span th:text="${usuario.username}">Usuario</span></span>
+                    <a th:href="@{/logout}" class="btn btn-outline">Salir</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO BANNER -->
+    <section class="hero-banner">
+        <div class="hero-content">
+            <h1 class="hero-title">Los mejores juegos, <span class="hero-highlight">al mejor precio</span></h1>
+            <p class="hero-sub">Descubre nuestra colección de títulos AAA y encuentre tu próxima aventura</p>
+        </div>
+    </section>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-container">
+
+        <!-- Filtros por Género -->
+        <div class="filters-bar">
+            <span class="filter-label">Filtrar:</span>
+            <a th:href="@{/home}" class="filter-chip" th:classappend="${generoSeleccionado == null and busqueda == null} ? 'active' : ''">
+                🎮 Todos
+            </a>
+            <a th:each="g : ${generos}"
+               th:href="@{/home(genero=${g})}"
+               class="filter-chip"
+               th:classappend="${generoSeleccionado == g} ? 'active' : ''"
+               th:text="${g}">
+            </a>
+        </div>
+
+        <!-- Mensajes Flash -->
+        <div th:if="${exito}" class="alert alert-success alert-float">
+            ✅ <span th:text="${exito}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error alert-float">
+            ⚠️ <span th:text="${error}"></span>
+        </div>
+
+        <!-- Resultado de búsqueda -->
+        <div th:if="${busqueda}" class="search-result">
+            <p>Resultados para: <strong th:text="${busqueda}"></strong>
+                <a href="/home">✕ Limpiar</a>
+            </p>
+        </div>
+
+        <!-- Grid de Videojuegos -->
+        <div class="games-grid">
+            <!-- Tarjeta de videojuego -->
+            <div th:each="juego : ${juegos}" class="game-card">
+                <div class="game-badge" th:text="${juego.genero}">RPG</div>
+
+                <!-- Imagen / Emoji por género -->
+                <div class="game-cover">
+                    <span class="game-emoji"
+                          th:text="${juego.genero == 'RPG'} ? '⚔️' :
+                                    (${juego.genero == 'Accion'} ? '💥' :
+                                    (${juego.genero == 'Aventura'} ? '🗺️' :
+                                    (${juego.genero == 'Deportes'} ? '⚽' :
+                                    (${juego.genero == 'Shooter'} ? '🔫' :
+                                    (${juego.genero == 'Terror'} ? '😱' :
+                                    (${juego.genero == 'Pelea'} ? '🥊' : '🎮'))))))">
+                    </span>
+                </div>
+
+                <div class="game-info">
+                    <h3 class="game-name" th:text="${juego.nombre}">Nombre del juego</h3>
+                    <p class="game-desc" th:text="${juego.descripcion}">Descripción...</p>
+
+                    <div class="game-meta">
+                        <span class="game-stock" th:classappend="${juego.stock < 5} ? 'stock-low' : ''">
+                            📦 Stock: <strong th:text="${juego.stock}">10</strong>
+                        </span>
+                    </div>
+
+                    <div class="game-footer">
+                        <div class="game-price">
+                            $<span th:text="${#numbers.formatDecimal(juego.precio, 0, 'POINT', 0, 'POINT')}">0</span>
+                        </div>
+
+                        <form th:action="@{/carrito/agregar}" method="post" class="add-form">
+                            <input type="hidden" name="videojuegoId" th:value="${juego.id}">
+                            <input type="hidden" name="cantidad" value="1">
+                            <button type="submit"
+                                    class="btn btn-primary btn-sm"
+                                    th:disabled="${juego.stock == 0}">
+                                <span th:if="${juego.stock > 0}">🛒 Agregar</span>
+                                <span th:if="${juego.stock == 0}">Sin stock</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sin resultados -->
+        <div th:if="${#lists.isEmpty(juegos)}" class="empty-state">
+            <span class="empty-icon">🎮</span>
+            <h3>No se encontraron videojuegos</h3>
+            <p>Intenta con otro término de búsqueda o categoría.</p>
+            <a href="/home" class="btn btn-primary">Ver todos los juegos</a>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>🎮 GameStore &copy; 2026 · Todos los derechos reservados</p>
+    </footer>
+
+    <script>
+        // Auto-hide alerts after 3 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-float');
+            alerts.forEach(a => {
+                a.style.transition = 'opacity 0.5s';
+                a.style.opacity = '0';
+                setTimeout(() => a.remove(), 500);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

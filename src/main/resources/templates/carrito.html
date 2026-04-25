@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameStore | Mi Carrito</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="main-body">
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/home" class="nav-brand">
+                <span class="nav-icon">🎮</span>
+                <span class="nav-title">GameStore</span>
+            </a>
+            <div class="nav-actions">
+                <a th:href="@{/home}" class="btn btn-outline">← Seguir comprando</a>
+                <a th:href="@{/carrito}" class="cart-btn">
+                    🛒 Carrito
+                    <span class="cart-badge" th:text="${itemsEnCarrito}" th:if="${itemsEnCarrito > 0}">0</span>
+                </a>
+                <div class="user-menu">
+                    <span class="user-greeting">👋 <span th:text="${usuario.username}">Usuario</span></span>
+                    <a th:href="@{/logout}" class="btn btn-outline">Salir</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <div class="cart-page">
+
+            <!-- Título -->
+            <div class="page-header">
+                <h1 class="page-title">🛒 Mi Carrito</h1>
+                <p class="page-subtitle" th:text="'Tienes ' + ${itemsEnCarrito} + ' producto(s) en tu carrito'"></p>
+            </div>
+
+            <!-- ✅ COMPRA EXITOSA -->
+            <div th:if="${compraExitosa}" class="purchase-success">
+                <div class="success-icon">🎉</div>
+                <h2>¡Compra realizada con éxito!</h2>
+                <p>Tu pedido ha sido procesado correctamente.</p>
+                <p class="success-total">
+                    Total pagado: <strong>$<span th:text="${#numbers.formatDecimal(totalPagado, 0, 'POINT', 0, 'POINT')}">0</span></strong>
+                </p>
+                <a href="/home" class="btn btn-primary">Seguir comprando</a>
+            </div>
+
+            <!-- Mensajes -->
+            <div th:if="${exito}" class="alert alert-success">✅ <span th:text="${exito}"></span></div>
+            <div th:if="${error}" class="alert alert-error">⚠️ <span th:text="${error}"></span></div>
+
+            <!-- CARRITO CON PRODUCTOS -->
+            <div th:if="${!#lists.isEmpty(carrito.items)}" class="cart-layout">
+
+                <!-- Lista de ítems -->
+                <div class="cart-items">
+                    <div th:each="item : ${carrito.items}" class="cart-item">
+                        <!-- Emoji del juego -->
+                        <div class="cart-item-img">
+                            <span class="game-emoji-sm"
+                                  th:text="${item.videojuego.genero == 'RPG'} ? '⚔️' :
+                                            (${item.videojuego.genero == 'Accion'} ? '💥' :
+                                            (${item.videojuego.genero == 'Aventura'} ? '🗺️' :
+                                            (${item.videojuego.genero == 'Deportes'} ? '⚽' :
+                                            (${item.videojuego.genero == 'Shooter'} ? '🔫' :
+                                            (${item.videojuego.genero == 'Terror'} ? '😱' :
+                                            (${item.videojuego.genero == 'Pelea'} ? '🥊' : '🎮'))))))">
+                            </span>
+                        </div>
+
+                        <!-- Info del juego -->
+                        <div class="cart-item-info">
+                            <h3 class="cart-item-name" th:text="${item.videojuego.nombre}">Juego</h3>
+                            <span class="cart-item-genre" th:text="${item.videojuego.genero}">Género</span>
+                            <p class="cart-item-price">
+                                Precio unitario: $<span th:text="${#numbers.formatDecimal(item.videojuego.precio, 0, 'POINT', 0, 'POINT')}"></span>
+                            </p>
+                        </div>
+
+                        <!-- Controles de cantidad -->
+                        <div class="cart-item-controls">
+                            <form th:action="@{/carrito/actualizar}" method="post" class="qty-form">
+                                <input type="hidden" name="itemId" th:value="${item.id}">
+                                <div class="qty-controls">
+                                    <button type="submit" name="cantidad" th:value="${item.cantidad - 1}" class="qty-btn">−</button>
+                                    <span class="qty-display" th:text="${item.cantidad}">1</span>
+                                    <button type="submit" name="cantidad" th:value="${item.cantidad + 1}"
+                                            class="qty-btn"
+                                            th:disabled="${item.cantidad >= item.videojuego.stock}">+</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Subtotal -->
+                        <div class="cart-item-subtotal">
+                            $<span th:text="${#numbers.formatDecimal(item.subtotal, 0, 'POINT', 0, 'POINT')}">0</span>
+                        </div>
+
+                        <!-- Eliminar -->
+                        <form th:action="@{/carrito/eliminar}" method="post">
+                            <input type="hidden" name="itemId" th:value="${item.id}">
+                            <button type="submit" class="btn-delete" title="Eliminar">🗑️</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Resumen del pedido -->
+                <div class="cart-summary">
+                    <h2 class="summary-title">Resumen del pedido</h2>
+
+                    <div class="summary-rows">
+                        <div th:each="item : ${carrito.items}" class="summary-row">
+                            <span th:text="${item.videojuego.nombre}" class="summary-name">Juego</span>
+                            <span>x<span th:text="${item.cantidad}">1</span></span>
+                            <span>$<span th:text="${#numbers.formatDecimal(item.subtotal, 0, 'POINT', 0, 'POINT')}">0</span></span>
+                        </div>
+                    </div>
+
+                    <div class="summary-divider"></div>
+
+                    <div class="summary-total">
+                        <span>Total:</span>
+                        <span class="total-amount">$<span th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'POINT')}">0</span></span>
+                    </div>
+
+                    <!-- Botón Comprar -->
+                    <form th:action="@{/carrito/comprar}" method="post">
+                        <button type="submit" class="btn btn-primary btn-full btn-buy">
+                            💳 Finalizar Compra
+                        </button>
+                    </form>
+
+                    <a href="/home" class="btn btn-outline btn-full" style="margin-top:0.75rem; text-align:center; display:block;">
+                        ← Seguir comprando
+                    </a>
+                </div>
+            </div>
+
+            <!-- CARRITO VACÍO -->
+            <div th:if="${#lists.isEmpty(carrito.items) and (compraExitosa == null or !compraExitosa)}" class="empty-state">
+                <span class="empty-icon">🛒</span>
+                <h3>Tu carrito está vacío</h3>
+                <p>¡Agrega algún videojuego para comenzar!</p>
+                <a href="/home" class="btn btn-primary">Ver catálogo</a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>🎮 GameStore &copy; 2026 · Todos los derechos reservados</p>
+    </footer>
+
+</body>
+</html>

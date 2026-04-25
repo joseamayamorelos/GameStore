@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameStore | Registro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="login-body">
+
+    <div class="login-wrapper">
+        <!-- Logo / Brand -->
+        <div class="login-brand">
+            <div class="brand-icon">🎮</div>
+            <h1 class="brand-name">GameStore</h1>
+            <p class="brand-tagline">Únete a la mejor comunidad gaming</p>
+        </div>
+
+        <!-- Card de registro -->
+        <div class="login-card">
+            <h2 class="login-title">Crea tu cuenta</h2>
+            <p class="login-subtitle">Completa tus datos para empezar</p>
+
+            <!-- Mensajes de error -->
+            <div th:if="${error}" class="alert alert-error">
+                <span>⚠️</span>
+                <span th:text="${error}"></span>
+            </div>
+
+            <!-- Formulario -->
+            <form th:action="@{/registro}" method="post" class="login-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">Usuario</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               class="form-input" 
+                               placeholder="Elige un nombre de usuario" 
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="form-input" 
+                               placeholder="Crea una contraseña" 
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🛡️</span>
+                        <input type="password" 
+                               id="confirmPassword" 
+                               name="confirmPassword" 
+                               class="form-input" 
+                               placeholder="Repite tu contraseña" 
+                               required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    Crear Cuenta
+                </button>
+                
+                <div class="login-footer">
+                    <p>¿Ya tienes cuenta? <a th:href="@{/login}" class="link-primary">Inicia sesión</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
